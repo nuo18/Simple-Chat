@@ -1,1 +1,1 @@
-# J'aime beaucoup ta mere
+import tkinter
