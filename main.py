@@ -1,29 +1,42 @@
-import tkinter
-import customtkinter as cs  # <- import the CustomTkinter module
+import tkinter as tk
+import tkinter.font as font
 import server, client
 
-# CTK: https://github.com/TomSchimansky/CustomTkinter/wiki/
-
 # Colours
-Black = "#282424"
-Teal = "57aaa0"
+BG_COLOR = "#F5F5F5"
+SEND_COLOR = "#57aaa0"
+RECEIVE_COLOR = "#E0E0E0"
+TEXT_COLOR = "#212121"
 
-root = tkinter.Tk()  # create the Tk window like you normally do
-root.geometry("500x600")
-root.title("Simple Chat")
-root.config(background=Black)
+class ChatGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.geometry("500x600")
+        self.master.title("Simple Chat")
+        self.master.config(background=BG_COLOR)
 
+        # Create widgets
+        self.message_frame = tk.Frame(self.master, bg=BG_COLOR)
+        self.message_frame.pack(pady=20)
 
-#? Text Box Entry
-entry = cs.CTkEntry(root, width=400, height=40, font=('Helvetica 12'))
-entry.place(relx=0.45, rely=0.95, anchor=tkinter.CENTER) # relx/rely is relative position, IDK what anchor is
-# We can use relative x ( horizontal ) and y ( vertical ) position with respect to width and 
-# height of the window by using relx and rely options. relx=0 is left edge of the window relx=1 
-# is right edge of the window. rely=0 is top of the window and rely=1 is the bottom edge of the window.
+        self.message_box = tk.Text(self.message_frame, width=50, height=20, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR, padx=10, pady=10)
+        self.message_box.pack(side=tk.LEFT)
 
-#? Button to send
-#send_button = cs.CTkButton(root, width=20, height=20)
-#! Fix error
-#send_button.place(relx=0.55, rely=0.95, anchor=tkinter.CENTER)
+        self.send_button = tk.Button(self.master, text="Send", command=self.send_message, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
+        self.send_button.pack(pady=10)
 
-root.mainloop()
+        self.input_box = tk.Entry(self.master, width=50, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR)
+        self.input_box.pack(pady=10)
+
+        # Set font for all widgets
+        default_font = font.nametofont("TkDefaultFont")
+        default_font.configure(size=12)
+
+    def send_message(self):
+        message = self.input_box.get()
+        # Implement logic for sending message to server/client
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    gui = ChatGUI(root)
+    root.mainloop()
