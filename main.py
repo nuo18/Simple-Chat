@@ -22,8 +22,8 @@ entry.place(relx=0.45, rely=0.95, anchor=tkinter.CENTER) # relx/rely is relative
 # is right edge of the window. rely=0 is top of the window and rely=1 is the bottom edge of the window.
 
 #? Button to send
-send_button = cs.CTkButton(root, width=20, height=20)
+#send_button = cs.CTkButton(root, width=20, height=20)
 #! Fix error
-send_button.place(relx=0.55, rely=0.95, anchor=tkinter.CENTER)
+#send_button.place(relx=0.55, rely=0.95, anchor=tkinter.CENTER)
 
 root.mainloop()
