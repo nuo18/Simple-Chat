@@ -34,6 +34,16 @@ class ChatGUI:
 
     def send_message(self):
         message = self.input_box.get()
+        
+        # Append the message to the message box
+        self.message_box.configure(state='normal')
+        self.message_box.insert(tk.END, "USER1: ", "USER1")
+        self.message_box.insert(tk.END, message + "\n")
+        self.message_box.configure(state='disabled')
+        
+        # Change the font and text color of the text in the message box
+        self.message_box.tag_configure("USER1", font=("Helvetica", 12, "bold"), foreground="#007bff")
+        self.input_box.delete(0, tk.END) # deletes the text in the entry box
         # Implement logic for sending message to server/client
 
 if __name__ == "__main__":
