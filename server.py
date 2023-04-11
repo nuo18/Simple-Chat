@@ -31,7 +31,7 @@ class Server():
 
                 client.close()
                 self.clients.pop(client)
-                self.sendMessage(f'{nickname} left!')
+                self.sendMessage(f'{nickname} left!'.encode('ascii'))
                 break
     
     def recieve(self):

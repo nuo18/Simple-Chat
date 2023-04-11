@@ -1,6 +1,36 @@
 import tkinter as tk
 import tkinter.font as font
-import server, client
+import threading
+import socketserver
+
+class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
+    def handle(self):
+        data = str(self.request.recv(1024), 'utf-8')
+        cur_thread = threading.current_thread()
+        response = bytes("{}: {}".format(cur_thread.name, data), 'utf-8')
+        self.request.sendall(response)
+
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    pass
+
+class ChatServer:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.server = None
+        self.server_thread = None
+
+    def start(self):
+        self.server = ThreadedTCPServer((self.host, self.port), ThreadedTCPRequestHandler)
+        self.server_thread = threading.Thread(target=self.server.serve_forever)
+        self.server_thread.daemon = True
+        self.server_thread.start()
+
+    def stop(self):
+        self.server.shutdown()
+        self.server.server_close()
+        self.server_thread.join()
+
 
 # Colours
 BG_COLOR = "#F5F5F5"
@@ -8,6 +38,63 @@ SEND_COLOR = "#57aaa0"
 RECEIVE_COLOR = "#E0E0E0"
 TEXT_COLOR = "#212121"
 
+import socket
+import threading
+
+class Client:
+    def __init__(self, host, port, username):
+        self.host = host
+        self.port = port
+        self.username = username
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    def connect(self):
+        self.socket.connect((self.host, self.port))
+        self.socket.sendall(self.username.encode())
+
+    def send_message(self, message):
+        self.socket.sendall(message.encode())
+
+    def receive_messages(self, chat_gui):
+        while True:
+            message = self.socket.recv(1024).decode()
+            chat_gui.append_message(message)
+
+class Server:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.clients = {}
+
+    def start(self):
+        self.socket.bind((self.host, self.port))
+        self.socket.listen(1)
+        print(f"Server listening on {self.host}:{self.port}...")
+
+        while True:
+            client_socket, client_address = self.socket.accept()
+            client_username = client_socket.recv(1024).decode()
+            print(f"New connection from {client_address[0]}:{client_address[1]} as {client_username}")
+            self.clients[client_socket] = client_username
+            client_thread = threading.Thread(target=self.handle_client, args=(client_socket,))
+            client_thread.start()
+
+    def handle_client(self, client_socket):
+        while True:
+            message = client_socket.recv(1024).decode()
+            if message:
+                username = self.clients[client_socket]
+                print(f"{username}: {message}")
+                for socket in self.clients:
+                    if socket != client_socket:
+                        socket.sendall(f"{username}: {message}".encode())
+            else:
+                username = self.clients[client_socket]
+                print(f"Connection from {username} closed.")
+                del self.clients[client_socket]
+                client_socket.close()
+                break
 
 
 class LoginGUI:
@@ -61,15 +148,22 @@ class LoginGUI:
 
         # Hide login window and show chat window
         self.master.destroy()
+        
+        client = Client(ip_address, port, username)
+        client.connect()
 
         root = tk.Tk()
-        gui = ChatGUI(root, ip_address, port, username)
+        gui = ChatGUI(root, client, username)
+        receive_thread = threading.Thread(target=client.receive_messages, args=(gui,))
+        receive_thread.start()
+        
         root.mainloop()
 
         # Implement logic for sending login details to server/client
     
     def start_server(self):
-        pass # Implement logic for starting server/client here.
+        self.chat_server = ChatServer(self.host, self.port)
+        self.chat_server.start()
 
 
 class ChatGUI:
@@ -83,10 +177,6 @@ class ChatGUI:
         self.username = username
         self.ip = ip_address
         self.port = port
-
-        # Create client object and connect to server
-        #self.client = client.Client(ip_address, port, username)
-        #self.client.connect()
 
         # Create widgets
         self.message_frame = tk.Frame(self.master, bg=BG_COLOR)
@@ -104,10 +194,27 @@ class ChatGUI:
         # Set font for all widgets
         default_font = font.nametofont("TkDefaultFont")
         default_font.configure(size=12)
+        
+        # Create a socket object
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Connect to the server
+        self.sock.connect((self.ip, self.port))
+
+        # Send the username to the server
+        self.sock.send(username.encode())
+
+        # Start a separate thread to receive messages from the server
+        self.receive_thread = threading.Thread(target=self.receive_messages)
+        self.receive_thread.daemon = True
+        self.receive_thread.start()
 
     def send_message(self):
         message = self.input_box.get()
         username = self.username
+        
+        # Send the message to the server
+        self.sock.send(message.encode())
         
         # Append the message to the message box
         self.message_box.configure(state='normal')
@@ -119,6 +226,21 @@ class ChatGUI:
         self.message_box.tag_configure("username", font=("Helvetica", 12, "bold"), foreground="#007bff")
         self.input_box.delete(0, tk.END) # deletes the text in the entry box
         # Implement logic for sending message to server/client
+    
+    def receive_messages(self):
+        while True:
+            try:
+                # Receive messages from the server
+                message = self.sock.recv(1024).decode()
+
+                # Append the message to the message box
+                self.message_box.configure(state='normal')
+                self.message_box.insert(tk.END, message)
+                self.message_box.configure(state='disabled')
+            except:
+                # If an error occurs, close the socket and exit the loop
+                self.sock.close()
+                break
 
 
 

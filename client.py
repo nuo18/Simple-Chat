@@ -16,7 +16,7 @@ class Client():
         self.client.connect((self.host, self.port))
 
     def sendMessage(self, message):
-        self.client.send(f"{self.nickname}: {message}")
+        self.client.send(f"{self.nickname}: {message}".encode('ascii'))
 
     def recieve(self):
         while True:                                                 #making valid connection
