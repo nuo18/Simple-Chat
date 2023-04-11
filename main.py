@@ -41,6 +41,14 @@ class LoginGUI:
 
         self.login_button = tk.Button(self.master, text="Login", command=self.login, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
         self.login_button.pack(pady=10)
+        
+        self.start_button = tk.Button(self.master, text="Start Server", command=self.start_server, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
+        self.start_button.pack(pady=10)
+        
+        self.exit_button = tk.Button(self.master, text="Exit", command=self.master.destroy, bg="red"
+                                        , fg="white", font=("Helvetica", 12), width=10, height=2)
+        self.exit_button.pack(pady=10)
+
 
         # Set font for all widgets
         default_font = font.nametofont("TkDefaultFont")
@@ -59,6 +67,9 @@ class LoginGUI:
         root.mainloop()
 
         # Implement logic for sending login details to server/client
+    
+    def start_server(self):
+        pass # Implement logic for starting server/client here.
 
 
 class ChatGUI:
