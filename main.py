@@ -92,7 +92,7 @@ class ChatGUI:
         self.message_frame = tk.Frame(self.master, bg=BG_COLOR)
         self.message_frame.pack(pady=20)
 
-        self.message_box = tk.Text(self.message_frame, width=50, height=20, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR, padx=10, pady=10)
+        self.message_box = tk.Text(self.message_frame, width=50, height=20, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR, state="disabled", padx=10, pady=10)
         self.message_box.pack(side=tk.LEFT)
 
         self.send_button = tk.Button(self.master, text="Send", command=self.send_message, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
