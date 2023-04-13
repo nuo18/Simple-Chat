@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.font as font
+import threading
 import server, client
 
 # Colours
@@ -69,8 +70,10 @@ class LoginGUI:
         # Implement logic for sending login details to server/client
     
     def start_server(self):
-        pass # Implement logic for starting server/client here.
+        self.server = server.Server()
+        self.server.start()
 
+        #Implement GUI to give server status
 
 class ChatGUI:
     def __init__(self, master, ip_address, port, username):
@@ -83,10 +86,13 @@ class ChatGUI:
         self.username = username
         self.ip = ip_address
         self.port = port
+        print(self.port)
 
         # Create client object and connect to server
-        #self.client = client.Client(ip_address, port, username)
-        #self.client.connect()
+        self.client = client.Client(self.ip, self.username, port=self.port)
+        self.client.connect()
+        
+        
 
         # Create widgets
         self.message_frame = tk.Frame(self.master, bg=BG_COLOR)
@@ -105,21 +111,35 @@ class ChatGUI:
         default_font = font.nametofont("TkDefaultFont")
         default_font.configure(size=12)
 
+        self.recieve_thread = threading.Thread(target=self.recieve_messages)
+        self.recieve_thread.start()
+
     def send_message(self):
         message = self.input_box.get()
         username = self.username
         
         # Append the message to the message box
-        self.message_box.configure(state='normal')
-        self.message_box.insert(tk.END, username + ": ", ("username", "blue"))
-        self.message_box.insert(tk.END, message + "\n")
-        self.message_box.configure(state='disabled')
+        #self.message_box.configure(state='normal')
+        #self.message_box.insert(tk.END, username + ": ", ("username", "blue"))
+        #self.message_box.insert(tk.END, message + "\n")
+        #self.message_box.configure(state='disabled')
+
+        self.client.sendMessage(message)
         
         # Change the font and text color of the text in the message box
         self.message_box.tag_configure("username", font=("Helvetica", 12, "bold"), foreground="#007bff")
         self.input_box.delete(0, tk.END) # deletes the text in the entry box
-        # Implement logic for sending message to server/client
+        
+    
+    def recieve_messages(self):
+        while True:
+            message = self.client.recieve()
+            if "i" == int(987):
+                break
 
+            self.message_box.configure(state='normal')
+            self.message_box.insert(tk.END, str(message) + "\n", ("username", "blue"))
+            self.message_box.configure(state='disabled')
 
 
 if __name__ == "__main__":
@@ -128,4 +148,5 @@ if __name__ == "__main__":
 
     # The login method of the LoginGUI class will destroy the login window
     # and create an instance of the ChatGUI class with the login details
+
     root.mainloop()
