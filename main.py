@@ -8,11 +8,13 @@ BG_COLOR = "#F5F5F5"
 SEND_COLOR = "#57aaa0"
 RECEIVE_COLOR = "#E0E0E0"
 TEXT_COLOR = "#212121"
-
+ERROR_COLOR = "#D90202"
 
 
 class LoginGUI:
     def __init__(self, master):
+        # TODO: Should also include a way to timeout if the ip or port is incorrect
+        
         self.master = master
         self.master.geometry("500x600")
         self.master.title("Login")
@@ -22,23 +24,32 @@ class LoginGUI:
         self.login_frame = tk.Frame(self.master, bg=BG_COLOR)
         self.login_frame.pack(pady=20)
 
+        
         self.ip_label = tk.Label(self.login_frame, text="IP Address:", font=("Helvetica", 12), bg=BG_COLOR)
         self.ip_label.pack()
-
+        
         self.ip_input = tk.Entry(self.login_frame, width=50, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR)
         self.ip_input.pack()
+        self.ip_error = tk.Label(self.login_frame, width=50, font=("Helvetica", 10), fg=ERROR_COLOR, bg=BG_COLOR)
+        self.ip_error.pack()
+        # TODO: Should include a way to check that the format of the ip is correct
+
 
         self.port_label = tk.Label(self.login_frame, text="Port:", font=("Helvetica", 12), bg=BG_COLOR)
         self.port_label.pack()
 
         self.port_input = tk.Entry(self.login_frame, width=50, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR)
         self.port_input.pack()
+        self.port_error = tk.Label(self.login_frame, width=50, font=("Helvetica", 10), fg=ERROR_COLOR, bg=BG_COLOR)
+        self.port_error.pack()
 
         self.username_label = tk.Label(self.login_frame, text="Username:", font=("Helvetica", 12), bg=BG_COLOR)
         self.username_label.pack()
 
         self.username_input = tk.Entry(self.login_frame, width=50, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR)
         self.username_input.pack()
+        self.username_error = tk.Label(self.login_frame, width=50, font=("Helvetica", 10), fg=ERROR_COLOR, bg=BG_COLOR)
+        self.username_error.pack()
 
         self.login_button = tk.Button(self.master, text="Login", command=self.login, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
         self.login_button.pack(pady=10)
@@ -70,9 +81,28 @@ class LoginGUI:
         # Implement logic for sending login details to server/client
     
     def start_server(self):
-        self.server = server.Server()
-        self.server.start()
+        server_port = self.port_input.get()
+        self.server = ""
 
+        # Check whether a port is input
+        # If a port is input, make sure it is an int
+        # Otherwise use the default port
+        if server_port:
+            try:
+                server_port = int(server_port)
+                self.server = server.Server(port=server_port)
+
+            except: 
+                self.port_error.config(text="Port must be an integer")
+        else:
+            server_port = 8468
+            self.server = server.Server(port=server_port)
+        
+        # Start the server as a thread
+        if self.server:
+            self.server_thread = threading.Thread(target = self.server.startServer)
+            self.server_thread.start()
+            self.start_button.config(text="Started")
         #Implement GUI to give server status
 
 class ChatGUI:
