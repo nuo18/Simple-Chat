@@ -23,10 +23,13 @@ class Server():
 
     def handle(self, client):
         while True:
+            print("Loop start")
             try:
+                print("Try")
                 message = client.recv(1024)
                 self.sendMessage(message)
             except:
+                print("except")
                 nickname = self.clients[client]
 
                 client.close()
@@ -44,5 +47,5 @@ class Server():
             print(f"Nickname is {nickname}")
             self.sendMessage(f"{nickname} joined!".encode('ascii'))
             client.send('Connected to server!'.encode('ascii'))
-            thread = threading.Thread(target=self.handle, args=(client))
+            thread = threading.Thread(target=self.handle, args=(client,))
             thread.start()
