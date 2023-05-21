@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.font as font
 import threading
 import server, client
+import re
 
 # Colours
 BG_COLOR = "#F5F5F5"
@@ -72,6 +73,11 @@ class LoginGUI:
         username = self.username_input.get()
         valid = True
 
+        # Reset the error messages (in case they previously existed)
+        self.ip_error.config(text="")
+        self.port_error.config(text="")
+        self.username_error.config(text="")
+
         # TODO Check that all the fields are in the correct format
 
         try:
@@ -85,7 +91,15 @@ class LoginGUI:
             self.username_error.config(text="You must have a username")
             valid = False
 
-             
+        if ip_address:
+            ip_format = "^([0-9]|[1-9][0-9]|[1-9][0-9]{2})\.([0-9]|[1-9][0-9]|[1-9][0-9]{2})\.([0-9]|[1-9][0-9]|[1-9][0-9]{2})\.([0-9]|[1-9][0-9]|[1-9][0-9]{2})$"
+            rex = re.compile(ip_format)
+            if not rex.match(ip_address):
+                self.ip_error.config(text="Ip address must be in the correct format")
+                valid = False
+        else:
+            self.ip_error.config(text="You need an ip address")
+            valid = False
         
 
 
