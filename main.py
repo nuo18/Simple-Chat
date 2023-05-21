@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.font as font
 import threading
 import server, client
+import re
 
 # Colours
 BG_COLOR = "#F5F5F5"
@@ -68,17 +69,50 @@ class LoginGUI:
 
     def login(self):
         ip_address = self.ip_input.get()
-        port = int(self.port_input.get())
+        port = self.port_input.get()
         username = self.username_input.get()
+        valid = True
 
-        # Hide login window and show chat window
-        self.master.destroy()
+        # Reset the error messages (in case they previously existed)
+        self.ip_error.config(text="")
+        self.port_error.config(text="")
+        self.username_error.config(text="")
 
-        root = tk.Tk()
-        gui = ChatGUI(root, ip_address, port, username)
-        root.mainloop()
+        # TODO Check that all the fields are in the correct format
 
-        # Implement logic for sending login details to server/client
+        try:
+            port = int(port)
+        except:
+            self.port_error.config(text="Port must be an integer")
+            valid = False
+
+
+        if not username:
+            self.username_error.config(text="You must have a username")
+            valid = False
+
+        if ip_address:
+            ip_format = "^([0-9]|[1-9][0-9]|[1-9][0-9]{2})\.([0-9]|[1-9][0-9]|[1-9][0-9]{2})\.([0-9]|[1-9][0-9]|[1-9][0-9]{2})\.([0-9]|[1-9][0-9]|[1-9][0-9]{2})$"
+            rex = re.compile(ip_format)
+            if not rex.match(ip_address):
+                self.ip_error.config(text="Ip address must be in the correct format")
+                valid = False
+        else:
+            self.ip_error.config(text="You need an ip address")
+            valid = False
+        
+
+
+        if valid:
+
+            # Hide login window and show chat window
+            self.master.destroy()
+
+            root = tk.Tk()
+            gui = ChatGUI(root, ip_address, port, username)
+            root.mainloop()
+
+            # Implement logic for sending login details to server/client
     
     def start_server(self):
         server_port = self.port_input.get()

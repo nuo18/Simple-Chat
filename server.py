@@ -23,13 +23,10 @@ class Server():
 
     def handle(self, client):
         while True:
-            print("Loop start")
             try:
-                print("Try")
                 message = client.recv(1024)
                 self.sendMessage(message)
             except:
-                print("except")
                 nickname = self.clients[client]
 
                 client.close()
