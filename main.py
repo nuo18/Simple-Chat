@@ -68,17 +68,37 @@ class LoginGUI:
 
     def login(self):
         ip_address = self.ip_input.get()
-        port = int(self.port_input.get())
+        port = self.port_input.get()
         username = self.username_input.get()
+        valid = True
 
-        # Hide login window and show chat window
-        self.master.destroy()
+        # TODO Check that all the fields are in the correct format
 
-        root = tk.Tk()
-        gui = ChatGUI(root, ip_address, port, username)
-        root.mainloop()
+        try:
+            port = int(port)
+        except:
+            self.port_error.config(text="Port must be an integer")
+            valid = False
 
-        # Implement logic for sending login details to server/client
+
+        if not username:
+            self.username_error.config(text="You must have a username")
+            valid = False
+
+             
+        
+
+
+        if valid:
+
+            # Hide login window and show chat window
+            self.master.destroy()
+
+            root = tk.Tk()
+            gui = ChatGUI(root, ip_address, port, username)
+            root.mainloop()
+
+            # Implement logic for sending login details to server/client
     
     def start_server(self):
         server_port = self.port_input.get()
