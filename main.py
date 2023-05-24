@@ -40,6 +40,7 @@ class LoginGUI:
         self.port_label.pack()
 
         self.port_input = tk.Entry(self.login_frame, width=50, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR)
+        self.port_input.insert(0, "8468")
         self.port_input.pack()
         self.port_error = tk.Label(self.login_frame, width=50, font=("Helvetica", 10), fg=ERROR_COLOR, bg=BG_COLOR)
         self.port_error.pack()
