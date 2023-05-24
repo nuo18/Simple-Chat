@@ -1,6 +1,8 @@
 import socket 
 import threading
 
+END = "ML?NZ3d$s85E'AnfFM[Pdqk43@}~"
+
 class Client():
     def __init__(self, host, username, port=8468):
         self.host = host
@@ -17,16 +19,24 @@ class Client():
         self.client.send(self.nickname.encode("ascii"))
 
     def sendMessage(self, message):
-        message = f"{self.nickname}: {message}"
+        if message != END:
+            message = f"{self.nickname}: {message}"
         self.client.send(message.encode('ascii'))
 
     def recieve(self):
         try:
             message = self.client.recv(1024).decode('ascii')
+            if len(message) == 0 or message == END:
+                raise Exception("Connection Closed")
+            
             if message == 'NICKNAME':
                 self.client.send(self.nickname.encode('ascii'))
             else:
                 return message
+
         except:                                                 #case on wrong ip/port details
-            return int(987)
             self.client.close()
+            return END
+            
+    def closeConnection(self):
+        self.client.close()

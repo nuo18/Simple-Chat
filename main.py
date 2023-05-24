@@ -12,6 +12,9 @@ RECEIVE_COLOR = "#E0E0E0"
 TEXT_COLOR = "#212121"
 ERROR_COLOR = "#D90202"
 
+# Variables
+END = "ML?NZ3d$s85E'AnfFM[Pdqk43@}~"
+
 
 class LoginGUI:
     def __init__(self, master):
@@ -103,8 +106,6 @@ class LoginGUI:
         else:
             self.ip_error.config(text="You need an ip address")
             valid = False
-        
-
 
         if valid:
 
@@ -157,15 +158,18 @@ class ChatGUI:
         self.username = username
         self.ip = ip_address
         self.port = port
-        print(self.port)
 
         # Create client object and connect to server
         self.client = client.Client(self.ip, self.username, port=self.port)
         self.client.connect()
         
+        self.run = True
         
-
         # Create widgets
+        
+        self.back_button = tk.Button(self.master, text="Back", command=self.leave_chat)
+        self.back_button.pack()
+        
         self.message_frame = tk.Frame(self.master, bg=BG_COLOR)
         self.message_frame.pack(pady=20)
 
@@ -203,14 +207,35 @@ class ChatGUI:
         
     
     def recieve_messages(self):
-        while True:
+        while self.run:
             message = self.client.recieve()
-            if "i" == int(987):
+            if message == END:
                 break
-
             self.message_box.configure(state='normal')
             self.message_box.insert(tk.END, str(message) + "\n", ("username", "blue"))
             self.message_box.configure(state='disabled')
+
+
+
+    def leave_chat(self):
+        # Close connection with server
+        self.client.sendMessage(END)
+        self.client.closeConnection()
+        self.run = False
+        # Ensure thread is ended before leaving
+        self.recieve_thread.join()
+        # Clear the window
+        self.clear()
+        # Load login screen
+        LoginGUI(self.master)
+
+    # Clears all the the contents of the master
+    def clear(self):
+        for i in self.master.grid_slaves():
+            i.destroy()
+
+        for i in self.master.pack_slaves():
+            i.destroy()
 
 
 if __name__ == "__main__":

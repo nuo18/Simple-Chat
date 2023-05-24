@@ -1,6 +1,8 @@
 import socket
 import threading
 
+END = "ML?NZ3d$s85E'AnfFM[Pdqk43@}~"
+
 class Server():
     def __init__(self, host=socket.gethostbyname(socket.gethostname()), port=8468):
         self.host = host
@@ -25,13 +27,19 @@ class Server():
         while True:
             try:
                 message = client.recv(1024)
-                self.sendMessage(message)
+                #print("A message has been recieved")
+                if len(message) == 0 or message.decode() == END:
+                    raise Exception("Connection closed")
+                else:
+                    self.sendMessage(message)
             except:
                 nickname = self.clients[client]
 
                 client.close()
                 self.clients.pop(client)
-                self.sendMessage(f'{nickname} left!')
+                self.sendMessage(f'{nickname} left!'.encode('ascii'))
+                #print("SERVER LEAVING MESSAGE")
+                print(f'{nickname} left!')
                 break
     
     def recieve(self):
@@ -46,3 +54,7 @@ class Server():
             client.send('Connected to server!'.encode('ascii'))
             thread = threading.Thread(target=self.handle, args=(client,))
             thread.start()
+
+    def stopServer(self):
+        for client in self.clients:
+            client.close()
