@@ -3,6 +3,7 @@ import tkinter.font as font
 import threading
 import server, client
 import re
+import time
 
 # Colours
 BG_COLOR = "#F5F5F5"
@@ -68,6 +69,7 @@ class LoginGUI:
         default_font = font.nametofont("TkDefaultFont")
         default_font.configure(size=12)
 
+
     def login(self):
         ip_address = self.ip_input.get()
         port = self.port_input.get()
@@ -106,14 +108,9 @@ class LoginGUI:
 
         if valid:
 
-            # Hide login window and show chat window
-            self.master.destroy()
-
-            root = tk.Tk()
+            # Clear the current screen and put the chat gui
+            self.clear()
             gui = ChatGUI(root, ip_address, port, username)
-            root.mainloop()
-
-            # Implement logic for sending login details to server/client
     
     def start_server(self):
         server_port = self.port_input.get()
@@ -139,6 +136,15 @@ class LoginGUI:
             self.server_thread.start()
             self.start_button.config(text="Started")
         #Implement GUI to give server status
+
+
+    # Clears all the the contents of the master
+    def clear(self):
+        for i in self.master.grid_slaves():
+            i.destroy()
+
+        for i in self.master.pack_slaves():
+            i.destroy()
 
 class ChatGUI:
     def __init__(self, master, ip_address, port, username):
@@ -210,7 +216,6 @@ class ChatGUI:
 if __name__ == "__main__":
     root = tk.Tk()
     login_gui = LoginGUI(root)
-
     # The login method of the LoginGUI class will destroy the login window
     # and create an instance of the ChatGUI class with the login details
 
