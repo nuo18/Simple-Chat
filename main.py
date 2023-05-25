@@ -15,11 +15,11 @@ ERROR_COLOR = "#D90202"
 # Variables
 END = "ML?NZ3d$s85E'AnfFM[Pdqk43@}~"
 
-
+# TODO Need to merge both classes I think
 class LoginGUI:
     def __init__(self, master):
         # TODO: Should also include a way to timeout if the ip or port is incorrect
-        
+                
         self.master = master
         self.master.geometry("500x600")
         self.master.title("Login")
@@ -37,8 +37,6 @@ class LoginGUI:
         self.ip_input.pack()
         self.ip_error = tk.Label(self.login_frame, width=50, font=("Helvetica", 10), fg=ERROR_COLOR, bg=BG_COLOR)
         self.ip_error.pack()
-        # TODO: Should include a way to check that the format of the ip is correct
-
 
         self.port_label = tk.Label(self.login_frame, text="Port:", font=("Helvetica", 12), bg=BG_COLOR)
         self.port_label.pack()
@@ -59,7 +57,7 @@ class LoginGUI:
 
         self.login_button = tk.Button(self.master, text="Login", command=self.login, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
         self.login_button.pack(pady=10)
-        
+
         self.start_button = tk.Button(self.master, text="Start Server", command=self.start_server, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
         self.start_button.pack(pady=10)
         
@@ -114,6 +112,8 @@ class LoginGUI:
             gui = ChatGUI(root, ip_address, port, username)
     
     def start_server(self):
+        # TODO Add an a way to verify whether the server is running or not and update the server accordingly
+
         server_port = self.port_input.get()
         self.server = ""
 
@@ -135,8 +135,10 @@ class LoginGUI:
         if self.server:
             self.server_thread = threading.Thread(target = self.server.startServer)
             self.server_thread.start()
-            self.start_button.config(text="Started")
+            self.start_button.config(text="Stop Server")
+            SERVER_RUNNING = True
         #Implement GUI to give server status
+
 
 
     # Clears all the the contents of the master
@@ -214,8 +216,6 @@ class ChatGUI:
             self.message_box.configure(state='normal')
             self.message_box.insert(tk.END, str(message) + "\n", ("username", "blue"))
             self.message_box.configure(state='disabled')
-
-
 
     def leave_chat(self):
         # Close connection with server

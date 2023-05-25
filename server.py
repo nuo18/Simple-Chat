@@ -9,6 +9,7 @@ class Server():
         self.port = port
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         #Dictionary containing clients and their nicknames
         self.clients = {} 
@@ -58,3 +59,7 @@ class Server():
     def stopServer(self):
         for client in self.clients:
             client.close()
+
+        self.server.shutdown(socket.SHUT_RDWR)
+        self.server.close()
+        
