@@ -45,16 +45,20 @@ class Server():
     
     def recieve(self):
         while True:
-            client, address = self.server.accept()
-            print(f"Connected with {address}")
-            client.send("NICKNAME".encode("ascii"))
-            nickname = client.recv(1024).decode('ascii')
-            self.clients[client] = nickname
-            print(f"Nickname is {nickname}")
-            self.sendMessage(f"{nickname} joined!".encode('ascii'))
-            client.send('Connected to server!'.encode('ascii'))
-            thread = threading.Thread(target=self.handle, args=(client,))
-            thread.start()
+            try:
+                client, address = self.server.accept()
+                print(f"Connected with {address}")
+                client.send("NICKNAME".encode("ascii"))
+                nickname = client.recv(1024).decode('ascii')
+                self.clients[client] = nickname
+                print(f"Nickname is {nickname}")
+                self.sendMessage(f"{nickname} joined!".encode('ascii'))
+                client.send('Connected to server!'.encode('ascii'))
+                thread = threading.Thread(target=self.handle, args=(client,))
+                thread.start()
+            except:
+                print("Server has stopped")
+                break
 
     def stopServer(self):
         for client in self.clients:
