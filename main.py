@@ -65,6 +65,8 @@ class SimpleChat:
 
         self.login_button = tk.Button(self.master, text="Login", command=self.login, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
         self.login_button.pack(pady=10)
+        self.login_error = tk.Label(self.login_frame, width=50, font=("Helvetica", 10), fg=ERROR_COLOR, bg=BG_COLOR)
+        self.login_error.pack()
 
         if self.SERVER_RUNNING:
             server_text = "Stop Server"
@@ -120,7 +122,8 @@ class SimpleChat:
         if valid:
             # Clear the current screen and put the chat gui
             self.clear()
-            gui = self.chat_gui(ip_address, port, username)
+            self.chat_gui(ip_address, port, username)
+
     
     def start_server(self):
         # TODO Add an a way to verify whether the server is running or not and update the server accordingly
@@ -169,35 +172,43 @@ class SimpleChat:
         self.username = username
 
         # Create client object and connect to server
-        self.client = client.Client(self.ip, self.username, port=self.port)
-        self.client.connect()
+        try:
+            # TODO Add a loading screen of some sort
+            
+            self.client = client.Client(self.ip, self.username, port=self.port)
+            self.client.connect()
+            self.run = True
+
+            # Create widgets
         
-        self.run = True
+            self.back_button = tk.Button(self.master, text="Back", command=self.leave_chat)
+            self.back_button.pack()
+            
+            self.message_frame = tk.Frame(self.master, bg=BG_COLOR)
+            self.message_frame.pack(pady=20)
+
+            self.message_box = tk.Text(self.message_frame, width=50, height=20, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR, state="disabled", padx=10, pady=10)
+            self.message_box.pack(side=tk.LEFT)
+
+            self.send_button = tk.Button(self.master, text="Send", command=self.send_message, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
+            self.send_button.pack(pady=10)
+
+            self.input_box = tk.Entry(self.master, width=50, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR)
+            self.input_box.pack(pady=10)
+
+            # Set font for all widgets
+            default_font = font.nametofont("TkDefaultFont")
+            default_font.configure(size=12)
+
+            self.recieve_thread = threading.Thread(target=self.recieve_messages)
+            self.recieve_thread.start()
+        except:
+            self.run = False
+            self.clear()
+            self.login_gui()
+            self.login_error.config(text="Failed to connect to server")
+          
         
-        # Create widgets
-        
-        self.back_button = tk.Button(self.master, text="Back", command=self.leave_chat)
-        self.back_button.pack()
-        
-        self.message_frame = tk.Frame(self.master, bg=BG_COLOR)
-        self.message_frame.pack(pady=20)
-
-        self.message_box = tk.Text(self.message_frame, width=50, height=20, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR, state="disabled", padx=10, pady=10)
-        self.message_box.pack(side=tk.LEFT)
-
-        self.send_button = tk.Button(self.master, text="Send", command=self.send_message, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
-        self.send_button.pack(pady=10)
-
-        self.input_box = tk.Entry(self.master, width=50, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR)
-        self.input_box.pack(pady=10)
-
-        # Set font for all widgets
-        default_font = font.nametofont("TkDefaultFont")
-        default_font.configure(size=12)
-
-        self.recieve_thread = threading.Thread(target=self.recieve_messages)
-        self.recieve_thread.start()
-
     def send_message(self):
         message = self.input_box.get()
         username = self.username
