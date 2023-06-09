@@ -48,7 +48,7 @@ class Server():
             try:
                 client, address = self.server.accept()
                 print(f"Connected with {address}")
-                client.send("NICKNAME".encode("ascii"))
+                client.send("NICKNAME".encode("ascii")) 
                 nickname = client.recv(1024).decode('ascii')
                 self.clients[client] = nickname
                 print(f"Nickname is {nickname}")

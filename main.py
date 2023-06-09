@@ -174,20 +174,16 @@ class SimpleChat:
         # Create client object and connect to server
         try:
             # TODO Add a loading screen of some sort
-            
-            self.client = client.Client(self.ip, self.username, port=self.port)
-            self.client.connect()
-            self.run = True
 
             # Create widgets
         
             self.back_button = tk.Button(self.master, text="Back", command=self.leave_chat)
-            self.back_button.pack()
+            self.back_button.pack(pady=10)
             
             self.message_frame = tk.Frame(self.master, bg=BG_COLOR)
-            self.message_frame.pack(pady=20)
+            self.message_frame.pack(pady=10)
 
-            self.message_box = tk.Text(self.message_frame, width=50, height=20, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR, state="disabled", padx=10, pady=10)
+            self.message_box = tk.Text(self.message_frame, width=50, height=20, font=("Helvetica", 12), fg="blue", bg=RECEIVE_COLOR, state="disabled", padx=10, pady=10)
             self.message_box.pack(side=tk.LEFT)
 
             self.send_button = tk.Button(self.master, text="Send", command=self.send_message, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
@@ -199,6 +195,11 @@ class SimpleChat:
             # Set font for all widgets
             default_font = font.nametofont("TkDefaultFont")
             default_font.configure(size=12)
+
+            # Setting up the code to connect and recieve messages from server
+            self.client = client.Client(self.ip, self.username, port=self.port)
+            self.client.connect()
+            self.run = True
 
             self.recieve_thread = threading.Thread(target=self.recieve_messages)
             self.recieve_thread.start()
@@ -231,8 +232,12 @@ class SimpleChat:
             message = self.client.recieve()
             if message == END:
                 break
+            elif message == None:
+                message = ""
+            else:
+                message = str(message) + "\n"
             self.message_box.configure(state='normal')
-            self.message_box.insert(tk.END, str(message) + "\n", ("username", "blue"))
+            self.message_box.insert(tk.END, message, ("username", "blue"))
             self.message_box.configure(state='disabled')
 
     def leave_chat(self):
