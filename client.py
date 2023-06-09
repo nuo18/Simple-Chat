@@ -9,6 +9,8 @@ class Client():
         self.port = port
         self.nickname = username
 
+        self.nickname_sent = False
+
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def setNickname(self, nickname):
@@ -16,7 +18,7 @@ class Client():
     
     def connect(self):
         self.client.connect((self.host, self.port))
-        self.client.send(self.nickname.encode("ascii"))
+        #self.client.send(self.nickname.encode("ascii"))
 
     def sendMessage(self, message):
         if message != END:
@@ -29,8 +31,9 @@ class Client():
             if len(message) == 0 or message == END:
                 raise Exception("Connection Closed")
             
-            if message == 'NICKNAME':
+            if message == 'NICKNAME' and not self.nickname_sent:
                 self.client.send(self.nickname.encode('ascii'))
+                self.nickname_sent = True
             else:
                 return message
 
