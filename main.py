@@ -3,6 +3,7 @@ import tkinter.font as font
 import threading
 import server, client
 import re
+import time
 
 # Colours
 BG_COLOR = "#F5F5F5"
@@ -11,15 +12,26 @@ RECEIVE_COLOR = "#E0E0E0"
 TEXT_COLOR = "#212121"
 ERROR_COLOR = "#D90202"
 
+# Variables
+END = "ML?NZ3d$s85E'AnfFM[Pdqk43@}~"
 
-class LoginGUI:
+# Merge of classes
+
+class SimpleChat:
     def __init__(self, master):
-        # TODO: Should also include a way to timeout if the ip or port is incorrect
-        
         self.master = master
         self.master.geometry("500x600")
-        self.master.title("Login")
         self.master.config(background=BG_COLOR)
+
+        self.SERVER_RUNNING = False
+
+        self.login_gui()
+
+
+    def login_gui(self):
+        # TODO: Should also include a way to timeout if the ip or port is incorrect
+                
+        self.master.title("Login")
 
         # Create widgets
         self.login_frame = tk.Frame(self.master, bg=BG_COLOR)
@@ -33,8 +45,6 @@ class LoginGUI:
         self.ip_input.pack()
         self.ip_error = tk.Label(self.login_frame, width=50, font=("Helvetica", 10), fg=ERROR_COLOR, bg=BG_COLOR)
         self.ip_error.pack()
-        # TODO: Should include a way to check that the format of the ip is correct
-
 
         self.port_label = tk.Label(self.login_frame, text="Port:", font=("Helvetica", 12), bg=BG_COLOR)
         self.port_label.pack()
@@ -55,8 +65,15 @@ class LoginGUI:
 
         self.login_button = tk.Button(self.master, text="Login", command=self.login, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
         self.login_button.pack(pady=10)
-        
-        self.start_button = tk.Button(self.master, text="Start Server", command=self.start_server, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
+        self.login_error = tk.Label(self.login_frame, width=50, font=("Helvetica", 10), fg=ERROR_COLOR, bg=BG_COLOR)
+        self.login_error.pack()
+
+        if self.SERVER_RUNNING:
+            server_text = "Stop Server"
+        else:
+            server_text = "Start Server"
+
+        self.start_button = tk.Button(self.master, text=server_text, command=self.start_server, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
         self.start_button.pack(pady=10)
         
         self.exit_button = tk.Button(self.master, text="Exit", command=self.master.destroy, bg="red"
@@ -101,84 +118,98 @@ class LoginGUI:
         else:
             self.ip_error.config(text="You need an ip address")
             valid = False
-        
-
 
         if valid:
+            # Clear the current screen and put the chat gui
+            self.clear()
+            self.chat_gui(ip_address, port, username)
 
-            # Hide login window and show chat window
-            self.master.destroy()
-
-            root = tk.Tk()
-            gui = ChatGUI(root, ip_address, port, username)
-            root.mainloop()
-
-            # Implement logic for sending login details to server/client
     
     def start_server(self):
-        server_port = self.port_input.get()
-        self.server = ""
+        # TODO Add an a way to verify whether the server is running or not and update the server accordingly
 
-        # Check whether a port is input
-        # If a port is input, make sure it is an int
-        # Otherwise use the default port
-        if server_port:
-            try:
-                server_port = int(server_port)
-                self.server = server.Server(port=server_port)
+        if self.SERVER_RUNNING:
+            print("Stop server")
+            self.server.stopServer()
+            self.SERVER_RUNNING = False
+            self.start_button.config(text="Start Server")
 
-            except: 
-                self.port_error.config(text="Port must be an integer")
         else:
-            server_port = 8468
-            self.server = server.Server(port=server_port)
-        
-        # Start the server as a thread
-        if self.server:
-            self.server_thread = threading.Thread(target = self.server.startServer)
-            self.server_thread.start()
-            self.start_button.config(text="Started")
-        #Implement GUI to give server status
+            print("Start server")
+            server_port = self.port_input.get()
+            self.server = ""
 
-class ChatGUI:
-    def __init__(self, master, ip_address, port, username):
-        self.master = master
-        self.master.geometry("500x600")
+            # Check whether a port is input
+            # If a port is input, make sure it is an int
+            # Otherwise use the default port
+            if server_port:
+                try:
+                    server_port = int(server_port)
+                    self.server = server.Server(port=server_port)
+
+                except: 
+                    self.port_error.config(text="Port must be an integer")
+            else:
+                server_port = 8468
+                self.server = server.Server(port=server_port)
+            
+            # Start the server as a thread
+            if self.server:
+                self.server_thread = threading.Thread(target = self.server.startServer)
+                self.server_thread.start()
+                self.start_button.config(text="Stop Server")
+                self.SERVER_RUNNING = True
+            #Implement GUI to give server status
+
+
+    def chat_gui(self, ip_address, port, username):
+
         self.master.title("Simple Chat")
-        self.master.config(background=BG_COLOR)
-        
+                
         # Intializing the variables to be used
-        self.username = username
         self.ip = ip_address
         self.port = port
-        print(self.port)
+        self.username = username
 
         # Create client object and connect to server
-        self.client = client.Client(self.ip, self.username, port=self.port)
-        self.client.connect()
+        try:
+            # TODO Add a loading screen of some sort
+
+            # Create widgets
         
+            self.back_button = tk.Button(self.master, text="Back", command=self.leave_chat)
+            self.back_button.pack(pady=10)
+            
+            self.message_frame = tk.Frame(self.master, bg=BG_COLOR)
+            self.message_frame.pack(pady=10)
+
+            self.message_box = tk.Text(self.message_frame, width=50, height=20, font=("Helvetica", 12), fg="blue", bg=RECEIVE_COLOR, state="disabled", padx=10, pady=10)
+            self.message_box.pack(side=tk.LEFT)
+
+            self.send_button = tk.Button(self.master, text="Send", command=self.send_message, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
+            self.send_button.pack(pady=10)
+
+            self.input_box = tk.Entry(self.master, width=50, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR)
+            self.input_box.pack(pady=10)
+
+            # Set font for all widgets
+            default_font = font.nametofont("TkDefaultFont")
+            default_font.configure(size=12)
+
+            # Setting up the code to connect and recieve messages from server
+            self.client = client.Client(self.ip, self.username, port=self.port)
+            self.client.connect()
+            self.run = True
+
+            self.recieve_thread = threading.Thread(target=self.recieve_messages)
+            self.recieve_thread.start()
+        except:
+            self.run = False
+            self.clear()
+            self.login_gui()
+            self.login_error.config(text="Failed to connect to server")
+          
         
-
-        # Create widgets
-        self.message_frame = tk.Frame(self.master, bg=BG_COLOR)
-        self.message_frame.pack(pady=20)
-
-        self.message_box = tk.Text(self.message_frame, width=50, height=20, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR, state="disabled", padx=10, pady=10)
-        self.message_box.pack(side=tk.LEFT)
-
-        self.send_button = tk.Button(self.master, text="Send", command=self.send_message, bg=SEND_COLOR, fg="white", font=("Helvetica", 12), width=10, height=2)
-        self.send_button.pack(pady=10)
-
-        self.input_box = tk.Entry(self.master, width=50, font=("Helvetica", 12), fg=TEXT_COLOR, bg=RECEIVE_COLOR)
-        self.input_box.pack(pady=10)
-
-        # Set font for all widgets
-        default_font = font.nametofont("TkDefaultFont")
-        default_font.configure(size=12)
-
-        self.recieve_thread = threading.Thread(target=self.recieve_messages)
-        self.recieve_thread.start()
-
     def send_message(self):
         message = self.input_box.get()
         username = self.username
@@ -197,20 +228,43 @@ class ChatGUI:
         
     
     def recieve_messages(self):
-        while True:
+        while self.run:
             message = self.client.recieve()
-            if "i" == int(987):
+            if message == END:
                 break
-
+            elif message == None:
+                message = ""
+            else:
+                message = str(message) + "\n"
             self.message_box.configure(state='normal')
-            self.message_box.insert(tk.END, str(message) + "\n", ("username", "blue"))
+            self.message_box.insert(tk.END, message, ("username", "blue"))
             self.message_box.configure(state='disabled')
 
+    def leave_chat(self):
+        # Close connection with server
+        self.client.sendMessage(END)
+        self.client.closeConnection()
+        self.run = False
+        # Ensure thread is ended before leaving
+        self.recieve_thread.join()
+        # Clear the window
+        self.clear()
+        # Load login screen
+        self.login_gui()
+    
+
+    # Clears all the the contents of the master
+    def clear(self):
+        for i in self.master.grid_slaves():
+            i.destroy()
+
+        for i in self.master.pack_slaves():
+            i.destroy()
+            
 
 if __name__ == "__main__":
     root = tk.Tk()
-    login_gui = LoginGUI(root)
-
+    simple_chat = SimpleChat(root)
     # The login method of the LoginGUI class will destroy the login window
     # and create an instance of the ChatGUI class with the login details
 
