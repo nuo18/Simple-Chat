@@ -8,17 +8,18 @@ SimpleChat is a basic chat application built with Python and Tkinter.
 
 ## How to Use
 
-1. Run the application.
-2. Enter your username.
-3. Choose your message color by clicking on one of the color buttons.
-4. Click on the 'Login' button to join the chat.
+1. Open terminal in the program directory
+- Run: *python main.py*
+- Enter *username* and *Local IP address*
+- Start server
+2. Open another terminal session
+- Redo Step 1 but instead Join server
+3. Chat away!
 
-## Requirements
-
-- Python 3
-- Tkinter
+## Current Progress
+![Alt text](<Screenshot from 2023-11-01 19-30-07.png>)
+![Alt text](<Screenshot from 2023-11-01 19-32-14.png>)
 
 ## Future Improvements
-
-- Save user's color choice for future sessions
-- Allow user to change color during chat session
+- Dark Mode
+- Chatting on internet
