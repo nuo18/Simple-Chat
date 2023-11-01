@@ -4,6 +4,7 @@ import threading
 import server, client
 import re
 import time
+from tkinter import colorchooser
 
 # Colours
 BG_COLOR = "#F5F5F5"
@@ -24,6 +25,8 @@ class SimpleChat:
         self.master.config(background=BG_COLOR)
 
         self.SERVER_RUNNING = False
+
+        self.user_color = TEXT_COLOR  # Default color
 
         self.login_gui()
 
@@ -80,6 +83,10 @@ class SimpleChat:
                                         , fg="white", font=("Helvetica", 12), width=10, height=2)
         self.exit_button.pack(pady=10)
 
+        # Colour chooser
+        # Add color picker button
+        self.color_button = tk.Button(self.login_frame, text="Choose chat color", command=self.choose_color)
+        self.color_button.pack()
 
         # Set font for all widgets
         default_font = font.nametofont("TkDefaultFont")
@@ -260,7 +267,11 @@ class SimpleChat:
 
         for i in self.master.pack_slaves():
             i.destroy()
-            
+    
+    def choose_color(self):
+        # Open color picker and store the chosen color
+        color_code = colorchooser.askcolor(title ="Choose color")
+        self.user_color = color_code[1]
 
 if __name__ == "__main__":
     root = tk.Tk()
