@@ -17,8 +17,7 @@ SimpleChat is a basic chat application built with Python and Tkinter.
 3. Chat away!
 
 ## Current Progress
-![Alt text](<Screenshot from 2023-11-01 19-30-07.png>)
-![Alt text](<Screenshot from 2023-11-01 19-32-14.png>)
+![](Demo_gif.gif)
 
 ## Future Improvements
 - Dark Mode
