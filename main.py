@@ -249,8 +249,11 @@ class SimpleChat:
 
     def leave_chat(self):
         # Close connection with server
-        self.client.sendMessage(END)
-        self.client.closeConnection()
+        try:
+            self.client.sendMessage(END)
+            self.client.closeConnection()
+        except:
+            print("Couldn't leave server (or server already shutdown)")
         self.run = False
         # Ensure thread is ended before leaving
         self.recieve_thread.join()
